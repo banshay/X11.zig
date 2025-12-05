@@ -219,7 +219,7 @@ fn update_X11(toolbox: *Toolbox, path: *const Paths) !void {
         }
     }
 
-    var xlib_conf_h = try include_dir.readFileAlloc(toolbox.getAllocator(), "XlibConf.h.in", std.math.maxInt(usize));
+    var xlib_conf_h = try include_dir.readFileAlloc("XlibConf.h.in", toolbox.getAllocator(), .unlimited);
 
     for ([_]struct {
         match: []const u8,
@@ -314,7 +314,7 @@ fn update_Xcursor(toolbox: *Toolbox, path: *const Paths) !void {
     });
     defer include_dir.close();
 
-    var xcursor_h = try include_dir.readFileAlloc(toolbox.getAllocator(), "Xcursor.h.in", std.math.maxInt(usize));
+    var xcursor_h = try include_dir.readFileAlloc("Xcursor.h.in", toolbox.getAllocator(), .unlimited);
 
     var xcursor_version = try toolbox.reference(.Xcursor);
     xcursor_version = xcursor_version[std.mem.indexOfAny(u8, xcursor_version, "0123456789").?..];
@@ -560,7 +560,7 @@ fn update_xorgproto(toolbox: *Toolbox, path: *const Paths) !void {
     });
     defer include_dir.close();
 
-    var xpoll_h = try include_dir.readFileAlloc(toolbox.getAllocator(), "Xpoll.h.in", std.math.maxInt(usize));
+    var xpoll_h = try include_dir.readFileAlloc("Xpoll.h.in", toolbox.getAllocator(), .unlimited);
     xpoll_h = try std.mem.replaceOwned(u8, toolbox.getAllocator(), xpoll_h, "@USE_FDS_BITS@", "__fds_bits");
     try toolbox.write(path.getX11IncludeX11(), "Xpoll.h", xpoll_h);
 
@@ -903,7 +903,7 @@ pub fn build(builder: *std.Build) !void {
         path.getX11IncludeX11(),
         "keysymdef.h",
     })});
-    const ks_tables_h_content = run_makekeys.captureStdOut();
+    const ks_tables_h_content = run_makekeys.captureStdOut(.{});
     const write_files = builder.addWriteFiles();
     const ks_tables_h = write_files.addCopyFile(ks_tables_h_content, toolbox.pathJoin(&.{
         "include",
